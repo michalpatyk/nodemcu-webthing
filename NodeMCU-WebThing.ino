@@ -15,20 +15,22 @@ DHTesp dht;
 Ticker sampler;
 boolean isTimeToSample = false;
 
+WebThingAdapter* adapter = NULL;
+const char* deviceTypes[] = {"Sensor", "Sensor", nullptr};
+ThingDevice dhtSensor("DHT22", "DHT22 Temperature & Humidity sensor", deviceTypes);
+ThingProperty tempSensorProperty("temperature", "Temperature", NUMBER, "TemperatureProperty");
+ThingProperty humiditySensorProperty("humidity", "Humidity", NUMBER, "HumidityProperty");
 
-
-WebThingAdapter* adapter;
-
-void sample(){
+void sample() {
   isTimeToSample = true;
 }
 
-void setupDHT(){
+void setupDHT() {
   dht.setup(DHTPIN, DHTesp::DHT22);
   sampler.attach_ms(dht.getMinimumSamplingPeriod(), sample);
 }
 
-void setupWiFi(){
+void setupWiFi() {
 #if defined(LED_BUILTIN)
   const int ledPin = LED_BUILTIN;
 #else
@@ -39,17 +41,17 @@ void setupWiFi(){
   Serial.begin(115200);
   Serial.println("");
   Serial.print("Connecting to \"");
-  Serial.print(STA_PASS1);
+  Serial.print(STA_SSID1);
   Serial.println("\"");
 #if defined(ESP8266) || defined(ESP32)
   WiFi.mode(WIFI_STA);
 #endif
-  WiFi.begin(STA_PASS1, STA_PASS1);
+  WiFi.begin(STA_SSID1, STA_PASS1);
   Serial.println("");
 
   // Wait for connection
   bool blink = true;
-  while (WiFi.status() != WL_CONNECTED) 
+  while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
     Serial.print(".");
@@ -60,22 +62,25 @@ void setupWiFi(){
 
   Serial.println("");
   Serial.print("Connected to ");
-  Serial.println(STA_PASS1);
+  Serial.println(STA_SSID1);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 }
 
-void webThingSetup(){
-    adapter = new WebThingAdapter("NodeMCU1", WiFi.localIP());
-    
-
+void webThingSetup() {
+  adapter = new WebThingAdapter("NodeMCU1", WiFi.localIP());
+  dhtSensor.addProperty(&tempSensorProperty);
+  dhtSensor.addProperty(&humiditySensorProperty);
+  adapter->addDevice(&dhtSensor);
+  adapter->begin();
   Serial.println("HTTP server started");
   Serial.print("http://");
   Serial.print(WiFi.localIP());
   Serial.print("/things/");
+  Serial.println(dhtSensor.id);
 }
 
-void setup(){
+void setup() {
   Serial.begin(115200);
   Serial.println();
   setupDHT();
@@ -83,8 +88,8 @@ void setup(){
   webThingSetup();
 }
 
-void loop(){
-  if (isTimeToSample){
+void loop() {
+  if (isTimeToSample) {
     float humidity = dht.getHumidity();
     float temperature = dht.getTemperature();
     Serial.println("Status\tHumidity (%)\tTemperature (C)\tHeatIndex (C)");
@@ -94,9 +99,15 @@ void loop(){
     Serial.print("\t\t");
     Serial.print(temperature, 1);
     Serial.print("\t\t");
-    Serial.print("\t\t");
     Serial.print(dht.computeHeatIndex(temperature, humidity, false), 1);
-    Serial.print("\t\t");
+    Serial.print("\n");
+    ThingPropertyValue tempValue;
+    tempValue.number = temperature;
+    tempSensorProperty.setValue(tempValue);
+    ThingPropertyValue humidityValue;
+    humidityValue.number = humidity;
+    humiditySensorProperty.setValue(humidityValue);
+    adapter->update();
     isTimeToSample = false;
   }
 }
