@@ -3,8 +3,14 @@
 #include "Thing.h"
 #include "WebThingAdapter.h"
 #include "user_config.h"
+#include <Adafruit_NeoPixel.h>
 
 #define DHTPIN D4 // Pin which is connected to the DHT sensor.
+#define NUM_PIXELS 8
+#define PIN_PIXELS D3
+
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_PIXELS, PIN_PIXELS, NEO_GRB + NEO_KHZ800);
+
 
 #ifdef ESP32
 #pragma message(THIS EXAMPLE IS FOR ESP8266 ONLY!)
@@ -86,6 +92,7 @@ void setup() {
   setupDHT();
   setupWiFi();
   webThingSetup();
+  pixels.begin();
 }
 
 void loop() {
@@ -110,4 +117,21 @@ void loop() {
     adapter->update();
     isTimeToSample = false;
   }
+
+  
+  int i;
+  for (i = 0; i < NUM_PIXELS; i++)
+  {
+    pixels.setPixelColor(i, pixels.Color(127, 0, 0));
+    pixels.show();
+    delay(500);
+  }
+
+  for (i = NUM_PIXELS - 1; i >= 0; i--)
+  {
+    pixels.setPixelColor(i, pixels.Color(0, 127, 0));
+    pixels.show();
+    delay(500);
+  }
+
 }
