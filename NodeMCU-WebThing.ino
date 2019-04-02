@@ -33,7 +33,7 @@ ThingProperty ledStripLevel("level", "The level of light from 0-100", NUMBER, "B
 ThingProperty ledStripColor("color", "The color of light in RGB", STRING, "ColorProperty");
 
 bool lastOn = false;
-String lastColor = "#ffffff";
+String color = "#ffffff";
 
 void sample() {
   isTimeToSample = true;
@@ -91,7 +91,7 @@ void webThingSetup() {
   ledStrip.addProperty(&ledStripOn);
 
   ThingPropertyValue colorValue;
-  colorValue.string = &lastColor; //default color is white
+  colorValue.string = &color; //default color is white
   ledStripColor.setValue(colorValue);
   ledStrip.addProperty(&ledStripColor);
 
@@ -109,16 +109,33 @@ void webThingSetup() {
   Serial.println(dhtSensor.id);
 }
 
-void update(String* color, int const level) {
+/**
+ * hex2int
+ * take a 2 digit hex string and convert it to a integer
+ */
+int twoHex2int(String hex)
+{
+    int len = 2;
+    int i;
+    int val = 0;
+    
+    for(i=0;i<len;i++){
+        if(hex[i] <= '9')
+            val += (hex[i]-'0')*(1<<(4*(len-1-i)));
+        else
+            val += (hex[i]-'a'+10)*(1<<(4*(len-1-i)));
+    }
+    return val;
+}
+
+void updateLedStrip(String* color, int const level) {
   if (!color) return;
   float dim = level / 100.;
   int red, green, blue;
   if (color && (color->length() == 7) && color->charAt(0) == '#') {
-    const char* hex = 1 + (color->c_str()); // skip leading '#'
-//    sscanf(0 + hex, "%2x", &red);
-red=100; green=100; blue=100;
-//    sscanf(2 + hex, "%2x", &green);
-//    sscanf(4 + hex, "%2x", &blue);
+    red = twoHex2int(color->substring(1,2));
+    green = twoHex2int(color->substring(3,2));
+    blue = twoHex2int(color->substring(5,2));
   }
   for (int i = 0; i < NUM_PIXELS; i++)
   {
@@ -160,7 +177,7 @@ void loop() {
   }
   bool on = ledStripOn.getValue().boolean;
   int level = ledStripLevel.getValue().number;
-  update(&lastColor, on ? level : 0);
+  updateLedStrip(&color, on ? level : 0);
 
   if (on != lastOn) {
     Serial.print(ledStrip.id);
@@ -169,7 +186,7 @@ void loop() {
     Serial.print(", level: ");
     Serial.print(level);
     Serial.print(", color: ");
-    Serial.println(lastColor);
+    Serial.println(color);
   }
   lastOn = on;
 
