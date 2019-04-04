@@ -22,10 +22,10 @@ Ticker sampler;
 boolean isTimeToSample = false;
 
 WebThingAdapter* adapter = NULL;
-const char* dht22Types[] = {"TemperatureSensor", "Sensor", nullptr};
+const char* dht22Types[] = {"TemperatureSensor","Sensor", nullptr};
 ThingDevice dhtSensor("DHT22", "DHT22 Temperature & Humidity sensor", dht22Types);
 ThingProperty tempSensorProperty("temperature", "Temperature", NUMBER, "TemperatureProperty");
-ThingProperty humiditySensorProperty("humidity", "Humidity", NUMBER, "HumidityProperty");
+ThingProperty humiditySensorProperty("humidity", "Humidity", NUMBER, nullptr);
 
 const char* ledStripTypes[] = {"Light", "OnOffSwitch", "ColorControl", nullptr};
 ThingDevice ledStrip("dimmable-color-light", "Dimmable Color Light", ledStripTypes);
@@ -111,36 +111,38 @@ void webThingSetup() {
 }
 
 /**
- * hex2int
- * take a 2 digit hex string and convert it to a integer
- */
+   hex2int
+   take a 2 digit hex string and convert it to a integer
+*/
 int twoHex2int(String hex)
 {
-    int len = 2;
-    int i;
-    int val = 0;
-    
-    for(i=0;i<len;i++){
-        if(hex[i] <= '9')
-            val += (hex[i]-'0')*(1<<(4*(len-1-i)));
-        else
-            val += (hex[i]-'a'+10)*(1<<(4*(len-1-i)));
-    }
-    return val;
+  int len = 2;
+  int i;
+  int val = 0;
+
+  for (i = 0; i < len; i++) {
+    if (hex[i] <= '9')
+      val += (hex[i] - '0') * (1 << (4 * (len - 1 - i)));
+    else if (hex[i] <= 'F')
+      val += (hex[i] - 'A' + 10) * (1 << (4 * (len - 1 - i)));
+    else
+      val += (hex[i] - 'a' + 10) * (1 << (4 * (len - 1 - i)));
+  }
+  return val;
 }
 
 void updateLedStrip(String* color, int const level) {
   if (!color) return;
-  float dim = level / 100.;
   int red, green, blue;
   if (color && (color->length() == 7) && color->charAt(0) == '#') {
-    red = twoHex2int(color->substring(1,2));
-    green = twoHex2int(color->substring(3,2));
-    blue = twoHex2int(color->substring(5,2));
+    red = twoHex2int(color->substring(1, 3));
+    green = twoHex2int(color->substring(3, 5));
+    blue = twoHex2int(color->substring(5, 7));
   }
   for (int i = 0; i < NUM_PIXELS; i++)
   {
-    pixels.setPixelColor(i, pixels.Color(red*dim, green*dim, blue*dim));
+    pixels.setPixelColor(i, pixels.Color(red, green, blue));
+    pixels.setBrightness(level);
     pixels.show();
   }
 }
