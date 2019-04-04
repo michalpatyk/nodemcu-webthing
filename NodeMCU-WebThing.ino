@@ -22,13 +22,13 @@ Ticker sampler;
 boolean isTimeToSample = false;
 
 WebThingAdapter* adapter = NULL;
-const char* dht22Types[] = {"TemperatureSensor","Sensor", nullptr};
-ThingDevice dhtSensor("DHT22", "DHT22 Temperature & Humidity sensor", dht22Types);
+const char* dhtTypes[] = {"TemperatureSensor", nullptr};
+ThingDevice dhtSensor("dht", "DHT22 Temperature & Humidity sensor", dhtTypes);
 ThingProperty tempSensorProperty("temperature", "Temperature", NUMBER, "TemperatureProperty");
-ThingProperty humiditySensorProperty("humidity", "Humidity", NUMBER, nullptr);
+ThingProperty humiditySensorProperty("humidity", "Humidity", NUMBER, "HumidityProperty");
 
 const char* ledStripTypes[] = {"Light", "OnOffSwitch", "ColorControl", nullptr};
-ThingDevice ledStrip("dimmable-color-light", "Dimmable Color Light", ledStripTypes);
+ThingDevice ledStrip("strip", "Dimmable Color Light", ledStripTypes);
 ThingProperty ledStripOn("on", "Whether the led is turned on", BOOLEAN, "OnOffProperty");
 ThingProperty ledStripLevel("level", "The level of light from 0-100", NUMBER, "BrightnessProperty");
 ThingProperty ledStripColor("color", "The color of light in RGB", STRING, "ColorProperty");
