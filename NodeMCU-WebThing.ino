@@ -22,10 +22,11 @@ Ticker sampler;
 boolean isTimeToSample = false;
 
 WebThingAdapter* adapter = NULL;
-const char* sensorTypes[] = {"Sensor", "Sensor", nullptr};
-ThingDevice dhtSensor("DHT22", "DHT22 Temperature & Humidity sensor", sensorTypes);
+const char* dht22Types[] = {"TemperatureSensor", "Sensor", nullptr};
+ThingDevice dhtSensor("DHT22", "DHT22 Temperature & Humidity sensor", dht22Types);
 ThingProperty tempSensorProperty("temperature", "Temperature", NUMBER, "TemperatureProperty");
 ThingProperty humiditySensorProperty("humidity", "Humidity", NUMBER, "HumidityProperty");
+
 const char* ledStripTypes[] = {"Light", "OnOffSwitch", "ColorControl", nullptr};
 ThingDevice ledStrip("dimmable-color-light", "Dimmable Color Light", ledStripTypes);
 ThingProperty ledStripOn("on", "Whether the led is turned on", BOOLEAN, "OnOffProperty");
