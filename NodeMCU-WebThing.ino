@@ -22,8 +22,9 @@ Ticker sampler;
 boolean isTimeToSample = false;
 
 WebThingAdapter* adapter = NULL;
-const char* dhtTypes[] = {"TemperatureSensor", nullptr};
-ThingDevice dhtSensor("dht", "DHT22 Temperature & Humidity sensor", dhtTypes);
+
+const char* sensorTypes[] = {"Sensor", "Sensor", nullptr};
+ThingDevice dhtSensor("th", "DHT22 Temperature & Humidity sensor", sensorTypes);
 ThingProperty tempSensorProperty("temperature", "Temperature", NUMBER, "TemperatureProperty");
 ThingProperty humiditySensorProperty("humidity", "Humidity", NUMBER, "HumidityProperty");
 
